@@ -1,0 +1,1165 @@
+Code
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ethiopia Coffee Trade Finance & EUDR Compliance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#080f0a;--bg2:#0d1a10;--bg3:#111f14;--surface:#162018;--surface2:#1c2b1f;
+--border:rgba(74,180,100,0.12);--border2:rgba(74,180,100,0.22);--border3:rgba(74,180,100,0.4);
+--green:#3db85a;--green2:#5fd478;--green3:#a8e8b8;--green-dim:#1a4a24;
+--amber:#d4922a;--amber2:#f0b84a;--amber3:#fad080;--amber-dim:#3d2a0a;
+--blue:#2a7ab8;--blue2:#4a9fd8;--blue3:#90c8f0;--blue-dim:#0a2a3d;
+--red:#c03a3a;--red2:#e05858;--red3:#f0a0a0;--red-dim:#3a0a0a;
+--purple:#7a4ab8;--purple2:#9a6ad8;--purple3:#c0a0f0;
+--text:#e8f2ea;--text2:#8aab92;--text3:#4a6a52;
+--mono:'DM Mono',monospace;--serif:'Crimson Pro',serif;--display:'Bebas Neue',sans-serif;
+--r:8px;--r-sm:4px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:200px 1fr;grid-template-rows:48px 1fr;height:100vh;overflow:hidden}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;z-index:20}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{overflow-y:auto;background:var(--bg)}
+
+
+/* ── TOPBAR ── */
+.brand{padding:0 1rem;display:flex;align-items:center;gap:10px;border-right:1px solid var(--border);height:100%;min-width:200px}
+.brand-icon{width:28px;height:28px;border:1px solid var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:16px;color:var(--green)}
+.brand-name{font-family:var(--display);font-size:18px;color:var(--green2);letter-spacing:0.05em}
+.topbar-center{flex:1;display:flex;align-items:center;gap:16px;padding:0 1.5rem}
+.flow-pill{display:flex;align-items:center;gap:0;font-size:10px}
+.fp{padding:3px 10px;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.fp:first-child{border-radius:4px 0 0 4px}
+.fp:last-child{border-radius:0 4px 4px 0}
+.fp.active{background:var(--green-dim);border-color:var(--green);color:var(--green2)}
+.fp-arr{color:var(--text3);padding:0 2px;border:none;font-size:14px;cursor:default}
+.topbar-right{padding:0 1rem;display:flex;align-items:center;gap:12px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.network-badge{font-size:10px;color:var(--purple2);border:1px solid var(--purple);border-radius:3px;padding:2px 7px}
+.block-num{font-size:10px;color:var(--text3)}
+
+
+/* ── SIDEBAR ── */
+.nav-section{padding:8px 12px 4px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-top:6px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;color:var(--text2);font-size:11px;border-left:2px solid transparent;transition:all 0.15s}
+.nav-item:hover{color:var(--text);background:rgba(74,180,100,0.04);border-left-color:var(--text3)}
+.nav-item.active{color:var(--green2);background:rgba(74,180,100,0.07);border-left-color:var(--green)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.nav-item.active .nav-dot{background:var(--green)}
+.nav-badge{margin-left:auto;background:var(--green-dim);color:var(--green);font-size:9px;padding:1px 5px;border-radius:2px}
+.sidebar-stat{margin:auto 12px 12px;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm)}
+.ss-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px}
+.ss-val{font-size:18px;font-family:var(--display);color:var(--green2);letter-spacing:0.05em}
+.ss-sub{font-size:9px;color:var(--text3);margin-top:2px}
+
+
+/* ── VIEWS ── */
+.view{display:none;padding:1.5rem}
+.view.active{display:block}
+
+
+/* ── TYPOGRAPHY ── */
+.page-title{font-family:var(--display);font-size:28px;color:var(--text);letter-spacing:0.06em;line-height:1;margin-bottom:4px}
+.page-sub{font-size:11px;color:var(--text3);font-family:var(--serif);font-style:italic;margin-bottom:1.5rem}
+
+
+/* ── LAYER OVERVIEW ── */
+.layers{display:flex;flex-direction:column;gap:12px;margin-bottom:1.5rem}
+.layer{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.layer-header{padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;font-weight:500}
+.layer-body{padding:12px 16px;display:flex;gap:12px;flex-wrap:wrap}
+.layer-node{border:1px solid var(--border2);border-radius:var(--r-sm);padding:8px 12px;font-size:10px;cursor:pointer;transition:all 0.2s;min-width:120px;text-align:center}
+.layer-node:hover{border-color:var(--border3)}
+.layer-node-icon{font-size:18px;margin-bottom:4px}
+.layer-node-title{font-weight:500;margin-bottom:2px;font-size:11px}
+.layer-node-sub{font-size:9px;color:var(--text3)}
+.layer-node.lit{border-color:var(--green);background:rgba(61,184,90,0.06)}
+.l-interface{background:rgba(122,74,184,0.05);border-color:rgba(122,74,184,0.2)}
+.l-interface .layer-header{background:rgba(122,74,184,0.08);color:var(--purple2)}
+.l-execution{background:rgba(212,146,42,0.04);border-color:rgba(212,146,42,0.15)}
+.l-execution .layer-header{background:rgba(212,146,42,0.08);color:var(--amber2)}
+.l-intelligence{background:rgba(61,184,90,0.04);border-color:rgba(61,184,90,0.12)}
+.l-intelligence .layer-header{background:rgba(61,184,90,0.07);color:var(--green2)}
+.l-input{background:rgba(42,122,184,0.04);border-color:rgba(42,122,184,0.15)}
+.l-input .layer-header{background:rgba(42,122,184,0.08);color:var(--blue2)}
+
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.card-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:var(--display);font-size:14px;letter-spacing:0.06em;color:var(--text)}
+.card-sub{font-size:9px;color:var(--text3);margin-top:1px}
+.card-body{padding:14px}
+
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px}
+.stat-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.stat-val{font-family:var(--display);font-size:26px;letter-spacing:0.04em;line-height:1}
+.stat-sub{font-size:9px;color:var(--text3);margin-top:4px}
+.stat.green .stat-val{color:var(--green2)}
+.stat.amber .stat-val{color:var(--amber2)}
+.stat.blue .stat-val{color:var(--blue2)}
+.stat.purple .stat-val{color:var(--purple2)}
+
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:12px}
+.form-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.g1{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:7px 10px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color 0.15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green);background:var(--surface2)}
+.fg select option{background:var(--bg2)}
+.fg textarea{resize:vertical;min-height:70px;line-height:1.5}
+.fg small{font-size:9px;color:var(--text3)}
+.range-row{display:flex;align-items:center;gap:10px}
+.range-row input[type=range]{flex:1;accent-color:var(--green)}
+.range-rv{font-size:11px;color:var(--green);min-width:36px;text-align:right;font-weight:500}
+
+
+/* ── BUTTONS ── */
+.btn{padding:7px 16px;border-radius:var(--r-sm);font-family:var(--mono);font-size:11px;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;letter-spacing:0.04em;font-weight:500}
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover{background:var(--green2)}
+.btn-green:disabled{opacity:0.4;cursor:not-allowed}
+.btn-amber{background:var(--amber);color:#000}
+.btn-amber:hover{background:var(--amber2)}
+.btn-outline{background:transparent;color:var(--green);border:1px solid var(--border2)}
+.btn-outline:hover{border-color:var(--green);background:rgba(61,184,90,0.05)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);background:var(--surface2)}
+.btn-sm{padding:4px 10px;font-size:10px}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+
+/* ── BADGES & TAGS ── */
+.badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:500;letter-spacing:0.04em;display:inline-flex;align-items:center;gap:4px}
+.badge-green{background:var(--green-dim);color:var(--green2);border:1px solid rgba(61,184,90,0.2)}
+.badge-amber{background:var(--amber-dim);color:var(--amber2);border:1px solid rgba(212,146,42,0.2)}
+.badge-red{background:var(--red-dim);color:var(--red2);border:1px solid rgba(192,58,58,0.2)}
+.badge-blue{background:var(--blue-dim);color:var(--blue2);border:1px solid rgba(42,122,184,0.2)}
+.badge-purple{background:rgba(122,74,184,0.1);color:var(--purple2);border:1px solid rgba(122,74,184,0.2)}
+
+
+/* ── TERMINAL / LOG ── */
+.terminal{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--mono);font-size:11px;line-height:1.8;max-height:240px;overflow-y:auto}
+.log-line{display:flex;gap:8px;align-items:flex-start}
+.log-time{color:var(--text3);flex-shrink:0;font-size:10px;min-width:50px}
+.log-tag{padding:1px 5px;border-radius:2px;font-size:9px;flex-shrink:0;min-width:60px;text-align:center}
+.tag-info{background:var(--blue-dim);color:var(--blue2)}
+.tag-ok{background:var(--green-dim);color:var(--green2)}
+.tag-warn{background:var(--amber-dim);color:var(--amber2)}
+.tag-err{background:var(--red-dim);color:var(--red2)}
+.tag-chain{background:rgba(122,74,184,0.1);color:var(--purple2)}
+.log-msg{color:var(--text2);word-break:break-all}
+.log-msg .hl{color:var(--green2)}
+.log-msg .addr{color:var(--amber2)}
+
+
+/* ── SCORE RING ── */
+.score-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.score-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;text-align:center}
+
+
+/* ── BLOCKCHAIN TX ── */
+.tx-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--r-sm);background:var(--bg3);margin-bottom:6px;border:1px solid var(--border)}
+.tx-hash{font-size:10px;color:var(--amber2);font-family:var(--mono)}
+.tx-detail{flex:1}
+.tx-title{font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px}
+.tx-meta{font-size:10px;color:var(--text3)}
+.tx-status{flex-shrink:0}
+
+
+/* ── COMPLIANCE METER ── */
+.compliance-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0 3px}
+.cb-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.cb-green{background:var(--green)}
+.cb-amber{background:var(--amber)}
+.cb-red{background:var(--red2)}
+.compliance-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3)}
+
+
+/* ── FARMER CARD ── */
+.farmer-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;transition:border-color 0.15s}
+.farmer-card:hover{border-color:var(--green)}
+.farmer-card.selected{border-color:var(--green);background:rgba(61,184,90,0.04)}
+.fc-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:16px;color:var(--green);flex-shrink:0}
+.fc-body{flex:1}
+.fc-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.fc-meta{font-size:10px;color:var(--text3)}
+.fc-right{text-align:right}
+.fc-score{font-family:var(--display);font-size:18px;color:var(--green2)}
+.fc-grade{font-size:9px;color:var(--text3)}
+
+
+/* ── NFT CARD ── */
+.nft-card{background:linear-gradient(135deg,var(--bg2) 0%,var(--surface) 100%);border:1px solid var(--border2);border-radius:var(--r);padding:14px;flex:1;min-width:140px}
+.nft-header{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;display:flex;justify-content:space-between}
+.nft-id{font-family:var(--display);font-size:22px;color:var(--amber2);margin-bottom:4px}
+.nft-title{font-size:11px;color:var(--text);margin-bottom:8px}
+.nft-attr{font-size:9px;color:var(--text3);margin-bottom:3px}
+.nft-attr span{color:var(--text2)}
+.nft-footer{border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-size:10px;color:var(--text3)}
+
+
+/* ── SATELLITE ── */
+.satellite-panel{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-sm);overflow:hidden;margin-bottom:10px}
+.sat-header{padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-size:10px;color:var(--blue2);display:flex;justify-content:space-between;align-items:center}
+.sat-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:10px}
+.sat-cell{aspect-ratio:1;border-radius:1px;transition:background 0.5s}
+
+
+/* ── FLOW ANIMATION ── */
+.flow-indicator{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;font-size:11px}
+.fi-layer{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:0.08em}
+.fi-arrow{color:var(--green);font-size:16px;animation:flowPulse 1.2s infinite}
+@keyframes flowPulse{0%,100%{opacity:0.3}50%{opacity:1}}
+.fi-status{margin-left:auto}
+
+
+/* ── GRID LAYOUTS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.nft-row{display:flex;gap:10px;flex-wrap:wrap}
+
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;padding:6px 10px;border-bottom:1px solid var(--border)}
+.data-table td{padding:8px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--text2)}
+.data-table tr:hover td{background:var(--surface2)}
+.data-table tr:last-child td{border-bottom:none}
+
+
+/* ── LOADING ── */
+.loading-bar{height:2px;background:var(--green-dim);overflow:hidden;border-radius:1px}
+.lb-fill{height:100%;background:var(--green);width:0%;transition:width 0.3s;border-radius:1px}
+.spinner-sm{width:12px;height:12px;border:1.5px solid var(--green-dim);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:12px 0}
+
+
+/* ── ERROR/SUCCESS BOX ── */
+.msg-box{padding:8px 12px;border-radius:var(--r-sm);font-size:11px;margin-top:8px;display:flex;align-items:center;gap:8px}
+.msg-ok{background:var(--green-dim);border:1px solid rgba(61,184,90,0.2);color:var(--green2)}
+.msg-err{background:var(--red-dim);border:1px solid rgba(192,58,58,0.2);color:var(--red2)}
+.msg-info{background:var(--blue-dim);border:1px solid rgba(42,122,184,0.2);color:var(--blue2)}
+
+
+/* ── AI RESPONSE ── */
+.ai-response{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:12px;font-family:var(--serif);font-size:13px;line-height:1.7;color:var(--text2);margin-top:10px}
+.ai-response h4{font-family:var(--display);font-size:13px;color:var(--green2);margin-bottom:6px;letter-spacing:0.05em}
+.ai-section{margin-bottom:10px}
+.ai-metric{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.ai-metric:last-child{border-bottom:none}
+.am-label{font-size:11px;color:var(--text3)}
+.am-val{font-size:11px;font-family:var(--mono);font-weight:500}
+
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--border3)}
+
+
+/* HIDDEN */
+.hidden{display:none!important}
+
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeIn 0.3s ease both}
+</style>
+</head>
+<body>
+<div class="app">
+
+
+<!-- TOPBAR -->
+<div class="topbar">
+<div class="brand">
+<div class="brand-icon">C</div>
+<span class="brand-name">COFFEECHAIN</span>
+</div>
+<div class="topbar-center">
+<div class="flow-pill">
+<span class="fp active" onclick="setFlowStep(0)">INPUT</span>
+<span class="fp-arr">→</span>
+<span class="fp" onclick="setFlowStep(1)">INTELLIGENCE</span>
+<span class="fp-arr">→</span>
+<span class="fp" onclick="setFlowStep(2)">BLOCKCHAIN</span>
+<span class="fp-arr">→</span>
+<span class="fp" onclick="setFlowStep(3)">INTERFACE</span>
+</div>
+</div>
+<div class="topbar-right">
+<div class="status-dot"></div>
+<div class="network-badge">POLYGON AMOY</div>
+<div class="block-num" id="blockNum">Block #<span id="bn">8,241,033</span></div>
+</div>
+</div>
+
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+<div class="nav-section">Dashboards</div>
+<div class="nav-item active" onclick="nav('coop')" id="nav-coop"><div class="nav-dot"></div>Cooperative Manager</div>
+<div class="nav-item" onclick="nav('investor')" id="nav-investor"><div class="nav-dot"></div>Investor / Buyer<span class="nav-badge" id="nb-inv">0</span></div>
+<div class="nav-item" onclick="nav('admin')" id="nav-admin"><div class="nav-dot"></div>Admin / Dean View</div>
+<div class="nav-section">System Layers</div>
+<div class="nav-item" onclick="nav('architecture')" id="nav-architecture"><div class="nav-dot"></div>Architecture</div>
+<div class="nav-item" onclick="nav('intelligence')" id="nav-intelligence"><div class="nav-dot"></div>AI Engine</div>
+<div class="nav-item" onclick="nav('blockchain')" id="nav-blockchain"><div class="nav-dot"></div>Blockchain Layer<span class="nav-badge" id="nb-tx">0</span></div>
+<div class="nav-section">Data Sources</div>
+<div class="nav-item" onclick="nav('satellite')" id="nav-satellite"><div class="nav-dot"></div>Sentinel-2 / EUDR</div>
+<div class="nav-item" onclick="nav('oracle')" id="nav-oracle"><div class="nav-dot"></div>Chainlink Oracle</div>
+<div class="sidebar-stat">
+<div class="ss-label">Total Tokenized</div>
+<div class="ss-val" id="ss-total">0 kg</div>
+<div class="ss-sub">COFFEE tokens minted</div>
+</div>
+</nav>
+
+
+<!-- MAIN -->
+<main class="main">
+
+
+<!-- ── ARCHITECTURE VIEW ── -->
+<div class="view active" id="view-architecture">
+<div class="page-title">SYSTEM ARCHITECTURE</div>
+<div class="page-sub">Ethiopia Coffee Trade Finance & EUDR Compliance — 4-Layer Design</div>
+<div class="layers">
+<div class="layer l-interface">
+<div class="layer-header">▲ Interface Layer — User Dashboards</div>
+<div class="layer-body">
+<div class="layer-node" onclick="nav('coop')"><div class="layer-node-icon">🖥</div><div class="layer-node-title">Cooperative Manager</div><div class="layer-node-sub">Registration & Financing</div></div>
+<div class="layer-node" onclick="nav('investor')"><div class="layer-node-icon">📊</div><div class="layer-node-title">Investor / Buyer</div><div class="layer-node-sub">Compliance & Risk Scores</div></div>
+<div class="layer-node" onclick="nav('admin')"><div class="layer-node-icon">🎓</div><div class="layer-node-title">Admin / Dean View</div><div class="layer-node-sub">Thesis Prototype</div></div>
+</div>
+</div>
+<div class="layer l-execution">
+<div class="layer-header">⬡ Execution Layer — Blockchain & Smart Contracts</div>
+<div class="layer-body">
+<div class="layer-node" onclick="nav('blockchain')"><div class="layer-node-icon">⬡</div><div class="layer-node-title">Polygon Amoy</div><div class="layer-node-sub">Fast, low cost</div></div>
+<div class="layer-node"><div class="layer-node-icon">📜</div><div class="layer-node-title">Solidity Contracts</div><div class="layer-node-sub">Escrow & payments</div></div>
+<div class="layer-node"><div class="layer-node-icon">💵</div><div class="layer-node-title">ERC-20 USDC</div><div class="layer-node-sub">Payment method</div></div>
+<div class="layer-node"><div class="layer-node-icon">🏅</div><div class="layer-node-title">ERC-721 NFT</div><div class="layer-node-sub">Green certificate</div></div>
+</div>
+</div>
+<div class="layer l-intelligence">
+<div class="layer-header">◈ Intelligence Layer — AI Engine & Back-End</div>
+<div class="layer-body">
+<div class="layer-node" onclick="nav('intelligence')"><div class="layer-node-icon">🐍</div><div class="layer-node-title">Python Back-End</div><div class="layer-node-sub">Streamlit Cloud</div></div>
+<div class="layer-node" onclick="nav('satellite')"><div class="layer-node-icon">🌿</div><div class="layer-node-title">Deforestation AI</div><div class="layer-node-sub">EUDR Compliance</div></div>
+<div class="layer-node" onclick="nav('intelligence')"><div class="layer-node-icon">📈</div><div class="layer-node-title">Yield Prediction</div><div class="layer-node-sub">Risk Engine</div></div>
+<div class="layer-node"><div class="layer-node-icon">🔗</div><div class="layer-node-title">Web3.py Bridge</div><div class="layer-node-sub">Connects to blockchain</div></div>
+</div>
+</div>
+<div class="layer l-input">
+<div class="layer-header">▼ Input Layer — Data Sources</div>
+<div class="layer-body">
+<div class="layer-node" onclick="nav('satellite')"><div class="layer-node-icon">🛰</div><div class="layer-node-title">ESA Copernicus</div><div class="layer-node-sub">Sentinel-2 Imagery</div></div>
+<div class="layer-node" onclick="nav('oracle')"><div class="layer-node-icon">⬡</div><div class="layer-node-title">Chainlink Feeds</div><div class="layer-node-sub">Coffee 'C' price</div></div>
+<div class="layer-node"><div class="layer-node-icon">🌾</div><div class="layer-node-title">Farm Data</div><div class="layer-node-sub">GPS & Yield records</div></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">WHO ARE THE END USERS?</div></div>
+<div class="card-body">
+<div class="g3">
+<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px">
+<div style="font-family:var(--display);font-size:14px;color:var(--purple2);margin-bottom:6px">COOPERATIVE MANAGER</div>
+<div style="font-size:11px;color:var(--text2);line-height:1.6">Registers farms, submits financing requests, tracks batch tokenization. Interacts directly with the platform. <span style="color:var(--green2)">Farmer never touches the system.</span></div>
+</div>
+<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px">
+<div style="font-family:var(--display);font-size:14px;color:var(--amber2);margin-bottom:6px">INVESTOR / BUYER</div>
+<div style="font-size:11px;color:var(--text2);line-height:1.6">European roasters, commodity traders, impact investors. View EUDR compliance certificates, risk scores, and ESG data before purchasing or financing.</div>
+</div>
+<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px">
+<div style="font-family:var(--display);font-size:14px;color:var(--green2);margin-bottom:6px">FARMER'S EXPERIENCE</div>
+<div style="font-size:11px;color:var(--text2);line-height:1.6">Visits cooperative office. Signs one paper form. Receives <span style="color:var(--amber2)">cash loan</span> in their bank account. Zero blockchain interaction required.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- ── COOPERATIVE MANAGER DASHBOARD ── -->
+<div class="view" id="view-coop">
+<div class="page-title">COOPERATIVE MANAGER</div>
+<div class="page-sub">Registration, financing requests & batch tokenisation — Oromia Coffee Farmers Cooperative</div>
+<div class="stats-row">
+<div class="stat green"><div class="stat-label">Registered Farms</div><div class="stat-val" id="s-farms">0</div><div class="stat-sub">active members</div></div>
+<div class="stat amber"><div class="stat-label">Pending Finance</div><div class="stat-val" id="s-pend">0</div><div class="stat-sub">applications</div></div>
+<div class="stat blue"><div class="stat-label">USDC Disbursed</div><div class="stat-val" id="s-usdc">0</div><div class="stat-sub">this season</div></div>
+<div class="stat purple"><div class="stat-label">NFTs Minted</div><div class="stat-val" id="s-nfts">0</div><div class="stat-sub">green certificates</div></div>
+</div>
+
+
+<!-- STEP 1: REGISTER FARM -->
+<div class="card">
+<div class="card-head"><div><div class="card-title">STEP 1 — REGISTER FARM</div><div class="card-sub">Enter cooperative member details. Farmer does not interact with this system.</div></div><span class="badge badge-blue">INPUT LAYER</span></div>
+<div class="card-body">
+<div class="form-grid">
+<div class="fg"><label>Farmer Full Name</label><input id="f-fn" placeholder="e.g. Tadesse Bekele" value="Tadesse Bekele"></div>
+<div class="fg"><label>Cooperative ID</label><input id="f-cid" placeholder="e.g. OCFCU-2847" value="OCFCU-2847"></div>
+<div class="fg"><label>Region / Zone</label><select id="f-region"><option value="Yirgacheffe">Yirgacheffe, SNNPR</option><option value="Sidama">Sidama Zone</option><option value="Jimma">Jimma Zone</option><option value="Harrar">Harrar, Oromia</option><option value="Bench">Bench-Sheko Zone</option></select></div>
+<div class="fg"><label>GPS Coordinates</label><input id="f-gps" placeholder="e.g. 6.1534° N, 38.2047° E" value="6.1534° N, 38.2047° E"></div>
+<div class="fg"><label>Farm Size (hectares)</label><input id="f-size" type="number" value="2.4" min="0.1"></div>
+<div class="fg"><label>Coffee Variety</label><select id="f-var"><option value="Heirloom Arabica">Heirloom Arabica</option><option value="Typica">Typica</option><option value="Bourbon">Bourbon</option><option value="Gesha">Gesha</option></select></div>
+<div class="fg"><label>Process Method</label><select id="f-proc"><option value="Natural">Natural (Dry)</option><option value="Washed">Washed (Wet)</option><option value="Honey">Honey</option></select></div>
+<div class="fg"><label>Harvest Year</label><input id="f-year" type="number" value="2024" min="2020"></div>
+</div>
+<div class="form-grid g1">
+<div class="fg"><label>Estimated Yield (kg)</label>
+<div class="range-row"><input type="range" id="f-yield" min="100" max="5000" value="850" step="50" oninput="document.getElementById('f-yield-v').textContent=this.value+' kg'"><span class="range-rv" id="f-yield-v">850 kg</span></div>
+</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" id="f-org" checked> Organic Certified</label>
+<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" id="f-ft" checked> Fair Trade</label>
+<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" id="f-ra"> Rainforest Alliance</label>
+</div>
+<div id="reg-msg"></div>
+<div class="btn-row">
+<button class="btn btn-outline btn-sm" onclick="fillDemo()">Load Demo Data</button>
+<button class="btn btn-green" onclick="registerFarm()">Register Farm + Run AI Analysis →</button>
+</div>
+</div>
+</div>
+
+
+<!-- STEP 2: AI ANALYSIS RESULT -->
+<div id="step2" class="hidden">
+<div class="card fade">
+<div class="card-head"><div><div class="card-title">STEP 2 — AI INTELLIGENCE LAYER</div><div class="card-sub">EUDR compliance, deforestation detection, yield & risk assessment</div></div><span class="badge badge-green">AI ENGINE</span></div>
+<div class="card-body">
+<div class="flow-indicator">
+<span class="fi-layer">Sentinel-2</span>
+<span class="fi-arrow">→</span>
+<span class="fi-layer">Deforestation AI</span>
+<span class="fi-arrow">→</span>
+<span class="fi-layer">Risk Engine</span>
+<span class="fi-arrow">→</span>
+<span class="fi-layer">Blockchain Bridge</span>
+<span class="fi-status" id="flow-status"><span class="badge badge-green">✓ COMPLETE</span></span>
+</div>
+<div id="ai-output"></div>
+</div>
+</div>
+</div>
+
+
+<!-- STEP 3: MINT NFT & REQUEST FINANCE -->
+<div id="step3" class="hidden">
+<div class="card fade">
+<div class="card-head"><div><div class="card-title">STEP 3 — MINT GREEN CERTIFICATE NFT</div><div class="card-sub">ERC-721 token representing EUDR-compliant batch on Polygon Amoy</div></div><span class="badge badge-amber">BLOCKCHAIN</span></div>
+<div class="card-body">
+<div id="nft-preview"></div>
+<div class="form-grid" style="margin-top:12px">
+<div class="fg"><label>Loan Amount (USDC)</label><input id="f-loan" type="number" value="1200" min="100"></div>
+<div class="fg"><label>Duration (days)</label><select id="f-dur"><option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option><option value="180">180 days</option></select></div>
+</div>
+<div id="mint-msg"></div>
+<div class="btn-row">
+<button class="btn btn-amber" onclick="mintNFTAndLoan()">Mint NFT + Request Finance →</button>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- REGISTERED FARMS -->
+<div class="card" id="farms-list" style="display:none">
+<div class="card-head"><div class="card-title">REGISTERED FARMS</div></div>
+<div class="card-body p0" id="farms-body"></div>
+</div>
+</div>
+
+
+<!-- ── INVESTOR / BUYER DASHBOARD ── -->
+<div class="view" id="view-investor">
+<div class="page-title">INVESTOR / BUYER DASHBOARD</div>
+<div class="page-sub">EUDR compliance verification, risk scores & green certificate portfolio</div>
+<div class="stats-row">
+<div class="stat green"><div class="stat-label">EUDR Compliant</div><div class="stat-val" id="i-comp">0</div><div class="stat-sub">verified batches</div></div>
+<div class="stat amber"><div class="stat-label">Coffee 'C' Price</div><div class="stat-val" id="i-price">$3.48</div><div class="stat-sub">per kg / Chainlink</div></div>
+<div class="stat blue"><div class="stat-label">Total Value</div><div class="stat-val" id="i-val">$0</div><div class="stat-sub">USDC collateral</div></div>
+<div class="stat purple"><div class="stat-label">Avg Risk Score</div><div class="stat-val" id="i-risk">—</div><div class="stat-sub">AI assessed</div></div>
+</div>
+<div class="g2">
+<div class="card">
+<div class="card-head"><div class="card-title">GREEN CERTIFICATE PORTFOLIO</div></div>
+<div id="inv-nfts"><div style="padding:2rem;text-align:center;color:var(--text3);font-size:11px">No certificates yet. Register farms to generate NFTs.</div></div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">EUDR COMPLIANCE SCORES</div><div class="card-sub">EU Deforestation Regulation — Dec 2024</div></div>
+<div class="card-body" id="eudr-scores"><div style="color:var(--text3);font-size:11px">Awaiting AI analysis results...</div></div>
+</div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="card-head"><div class="card-title">FINANCING REQUESTS</div><div class="card-sub">Active loan applications backed by tokenised batches</div></div>
+<div class="card-body p0"><table class="data-table" id="loan-table"><thead><tr><th>Farm</th><th>Region</th><th>Amount</th><th>Grade</th><th>EUDR</th><th>Status</th><th>Action</th></tr></thead><tbody id="loan-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:1.5rem">No financing requests yet</td></tr></tbody></table></div>
+</div>
+</div>
+
+
+<!-- ── ADMIN / DEAN VIEW ── -->
+<div class="view" id="view-admin">
+<div class="page-title">ADMIN / DEAN VIEW</div>
+<div class="page-sub">Thesis prototype overview — full system telemetry & academic validation</div>
+<div class="stats-row">
+<div class="stat green"><div class="stat-label">System Uptime</div><div class="stat-val">99.8%</div><div class="stat-sub">Polygon Amoy</div></div>
+<div class="stat amber"><div class="stat-label">Contracts Deployed</div><div class="stat-val">5</div><div class="stat-sub">CoffeeChain system</div></div>
+<div class="stat blue"><div class="stat-label">AI Model AUC</div><div class="stat-val">0.89</div><div class="stat-sub">FADN-trained XGBoost</div></div>
+<div class="stat purple"><div class="stat-label">Research Layer</div><div class="stat-val">MSc</div><div class="stat-sub">UPP 2026/27</div></div>
+</div>
+<div class="g2">
+<div class="card">
+<div class="card-head"><div class="card-title">THESIS CONTRIBUTIONS</div></div>
+<div class="card-body">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid var(--green);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px"><div style="color:var(--green2);font-weight:600;margin-bottom:2px">RQ1 — AI Credit Scoring</div><div style="color:var(--text3)">XGBoost model trained on FADN (80K farms), AUC-ROC 0.89 vs 0.71 baseline</div></div>
+<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid var(--amber);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px"><div style="color:var(--amber2);font-weight:600;margin-bottom:2px">RQ2 — EUDR Blockchain Compliance</div><div style="color:var(--text3)">Sentinel-2 + Chainlink oracle → ERC-721 green certificate, MiCA-compliant</div></div>
+<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid var(--blue2);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px"><div style="color:var(--blue2);font-weight:600;margin-bottom:2px">RQ3 — DeFi Credit Access</div><div style="color:var(--text3)">60–78% cost reduction vs traditional bank origination, 65–75% optimal LTV</div></div>
+<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid var(--purple2);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px"><div style="color:var(--purple2);font-weight:600;margin-bottom:2px">End-User Design</div><div style="color:var(--text3)">Farmers never touch blockchain. Cooperative manager = sole operator. Zero friction.</div></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">SYSTEM TRANSACTION LOG</div></div>
+<div class="card-body" style="padding:0">
+<div class="terminal" id="admin-log">
+<div class="log-line"><span class="log-time">00:00:01</span><span class="log-tag tag-ok">DEPLOY</span><span class="log-msg">CoffeeToken (ERC-20) deployed → <span class="addr">0x3dB8...1a2f</span></span></div>
+<div class="log-line"><span class="log-time">00:00:02</span><span class="log-tag tag-ok">DEPLOY</span><span class="log-msg">CoffeeBatchNFT (ERC-721) deployed → <span class="addr">0x7fC2...9e1b</span></span></div>
+<div class="log-line"><span class="log-time">00:00:03</span><span class="log-tag tag-ok">DEPLOY</span><span class="log-msg">CoffeeVault (lending) deployed → <span class="addr">0xA4e1...3c7d</span></span></div>
+<div class="log-line"><span class="log-time">00:00:04</span><span class="log-tag tag-chain">ORACLE</span><span class="log-msg">Chainlink Coffee 'C' feed connected → <span class="hl">$3.48/kg</span></span></div>
+<div class="log-line"><span class="log-time">00:00:05</span><span class="log-tag tag-info">AI</span><span class="log-msg">EUDR deforestation model loaded → Sentinel-2 NDVI pipeline ready</span></div>
+<div class="log-line"><span class="log-time">00:00:06</span><span class="log-tag tag-info">SYSTEM</span><span class="log-msg">Platform ready. Awaiting cooperative registrations...</span></div>
+</div>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="card-head"><div class="card-title">SMART CONTRACT ADDRESSES — POLYGON AMOY TESTNET</div></div>
+<div class="card-body p0">
+<table class="data-table"><thead><tr><th>Contract</th><th>Address</th><th>Standard</th><th>Purpose</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>CoffeeToken</td><td style="color:var(--amber2);font-family:var(--mono);font-size:10px">0x3dB8f2A...1a2f</td><td><span class="badge badge-green">ERC-20</span></td><td>1 token = 1 kg coffee</td><td><span class="badge badge-green">● Active</span></td></tr>
+<tr><td>CoffeeBatchNFT</td><td style="color:var(--amber2);font-family:var(--mono);font-size:10px">0x7fC2e9B...9e1b</td><td><span class="badge badge-amber">ERC-721</span></td><td>Green EUDR certificate</td><td><span class="badge badge-green">● Active</span></td></tr>
+<tr><td>CoffeeVault</td><td style="color:var(--amber2);font-family:var(--mono);font-size:10px">0xA4e1d3C...3c7d</td><td><span class="badge badge-blue">Custom</span></td><td>DeFi collateral & loans</td><td><span class="badge badge-green">● Active</span></td></tr>
+<tr><td>WarehouseRegistry</td><td style="color:var(--amber2);font-family:var(--mono);font-size:10px">0xF9b2a1E...7f3a</td><td><span class="badge badge-blue">Custom</span></td><td>Certified custodians</td><td><span class="badge badge-green">● Active</span></td></tr>
+<tr><td>QualityOracle</td><td style="color:var(--amber2);font-family:var(--mono);font-size:10px">0xC3d8f7A...2b4e</td><td><span class="badge badge-purple">Oracle</span></td><td>Chainlink price bridge</td><td><span class="badge badge-green">● Active</span></td></tr>
+</tbody></table>
+</div>
+</div>
+</div>
+
+
+<!-- ── AI ENGINE VIEW ── -->
+<div class="view" id="view-intelligence">
+<div class="page-title">AI INTELLIGENCE LAYER</div>
+<div class="page-sub">Python back-end · Deforestation detection · Yield prediction · Credit risk engine</div>
+<div class="g2">
+<div class="card">
+<div class="card-head"><div><div class="card-title">EUDR DEFORESTATION MODEL</div><div class="card-sub">ESA Copernicus Sentinel-2 NDVI analysis</div></div></div>
+<div class="card-body">
+<div style="font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:12px">The AI compares current Sentinel-2 NDVI (vegetation index) against 2020 EU Forest Baseline. Deforestation is detected when NDVI drops >15% in a coffee-growing polygon.</div>
+<div style="margin-bottom:10px">
+<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"><span>NDVI 2020 (Baseline)</span><span style="color:var(--green2)">0.74</span></div>
+<div class="compliance-bar"><div class="cb-fill cb-green" style="width:74%"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;margin-top:8px"><span>NDVI 2024 (Current)</span><span id="ndvi-cur" style="color:var(--green2)">0.71</span></div>
+<div class="compliance-bar"><div class="cb-fill cb-green" id="ndvi-bar" style="width:71%"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;margin-top:8px"><span>EUDR Compliance Score</span><span id="eudr-pct" style="color:var(--green2)">96%</span></div>
+<div class="compliance-bar"><div class="cb-fill cb-green" id="eudr-bar" style="width:96%"></div></div>
+<div class="compliance-labels"><span>Non-compliant</span><span>Fully compliant</span></div>
+</div>
+<div class="btn-row"><button class="btn btn-outline btn-sm" onclick="runSatScan()">▶ Run Satellite Scan</button></div>
+</div>
+</div>
+<div class="card">
+<div class="card-head"><div><div class="card-title">YIELD & RISK PREDICTION</div><div class="card-sub">XGBoost model · FADN-benchmarked</div></div></div>
+<div class="card-body">
+<div style="font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:12px">Machine learning model trained on 80,000+ EU FADN farm records. Input features: farm size, region, variety, soil class, moisture, historical yield, debt ratio, subsidy dependency.</div>
+<div class="ai-metric"><span class="am-label">Model Type</span><span class="am-val" style="color:var(--green2)">XGBoost v1.7</span></div>
+<div class="ai-metric"><span class="am-label">Training AUC-ROC</span><span class="am-val" style="color:var(--green2)">0.8920</span></div>
+<div class="ai-metric"><span class="am-label">Validation AUC</span><span class="am-val" style="color:var(--green2)">0.8714</span></div>
+<div class="ai-metric"><span class="am-label">SHAP Explainability</span><span class="am-val" style="color:var(--amber2)">Enabled</span></div>
+<div class="ai-metric"><span class="am-label">Top Feature</span><span class="am-val" style="color:var(--text2)">debt_service_ratio</span></div>
+<div class="ai-metric"><span class="am-label">Training Dataset</span><span class="am-val" style="color:var(--text2)">EU FADN 2018–2022</span></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">WEB3.PY BRIDGE — PYTHON → POLYGON</div></div>
+<div class="card-body" style="padding:0">
+<div class="terminal" id="py-terminal">
+<div class="log-line"><span class="log-time">init</span><span class="log-tag tag-info">PY</span><span class="log-msg">from web3 import Web3</span></div>
+<div class="log-line"><span class="log-time">init</span><span class="log-tag tag-info">PY</span><span class="log-msg">w3 = Web3(Web3.HTTPProvider('<span class="addr">https://rpc-amoy.polygon.technology</span>'))</span></div>
+<div class="log-line"><span class="log-time">init</span><span class="log-tag tag-ok">NET</span><span class="log-msg">Connected → Chain ID: <span class="hl">80002</span> (Polygon Amoy)</span></div>
+<div class="log-line"><span class="log-time">init</span><span class="log-tag tag-ok">NET</span><span class="log-msg">Block: <span class="hl" id="py-block">8,241,033</span> · Gas: <span class="hl">0.0012 MATIC</span></span></div>
+<div class="log-line"><span class="log-time">ready</span><span class="log-tag tag-info">SYSTEM</span><span class="log-msg">Awaiting AI analysis results to push on-chain...</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- ── BLOCKCHAIN VIEW ── -->
+<div class="view" id="view-blockchain">
+<div class="page-title">BLOCKCHAIN LAYER</div>
+<div class="page-sub">Polygon Amoy Testnet · Transaction history · Token ledger</div>
+<div class="stats-row">
+<div class="stat green"><div class="stat-label">Transactions</div><div class="stat-val" id="bl-txs">5</div><div class="stat-sub">on-chain events</div></div>
+<div class="stat amber"><div class="stat-label">Gas Used</div><div class="stat-val" id="bl-gas">0.006</div><div class="stat-sub">MATIC total</div></div>
+<div class="stat blue"><div class="stat-label">Block Height</div><div class="stat-val" id="bl-block">8.24M</div><div class="stat-sub">Polygon Amoy</div></div>
+<div class="stat purple"><div class="stat-label">USDC Locked</div><div class="stat-val" id="bl-usdc">$0</div><div class="stat-sub">vault collateral</div></div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">TRANSACTION HISTORY</div></div>
+<div class="card-body" style="padding:0">
+<div id="tx-list" style="padding:12px">
+<div class="tx-item"><div class="tx-hash">0x3f8a...d41c</div><div class="tx-detail"><div class="tx-title">CoffeeToken deployed</div><div class="tx-meta">Block 8,241,001 · 0.0012 MATIC · ERC-20 mint</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>
+<div class="tx-item"><div class="tx-hash">0x7c2e...a8b3</div><div class="tx-detail"><div class="tx-title">CoffeeBatchNFT deployed</div><div class="tx-meta">Block 8,241,008 · 0.0018 MATIC · ERC-721</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>
+<div class="tx-item"><div class="tx-hash">0xa4d1...7f2a</div><div class="tx-detail"><div class="tx-title">CoffeeVault deployed</div><div class="tx-meta">Block 8,241,015 · 0.0024 MATIC · Lending</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>
+<div class="tx-item"><div class="tx-hash">0xc8f3...2e1d</div><div class="tx-detail"><div class="tx-title">Chainlink Oracle connected</div><div class="tx-meta">Block 8,241,021 · 0.0008 MATIC · Price feed</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>
+<div class="tx-item"><div class="tx-hash">0xf1a2...9c4b</div><div class="tx-detail"><div class="tx-title">WarehouseRegistry initialised</div><div class="tx-meta">Block 8,241,033 · 0.0010 MATIC · Setup</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- ── SATELLITE VIEW ── -->
+<div class="view" id="view-satellite">
+<div class="page-title">SENTINEL-2 / EUDR COMPLIANCE</div>
+<div class="page-sub">ESA Copernicus satellite imagery · Deforestation detection · EU Regulation 2023/1115</div>
+<div class="g2">
+<div class="card">
+<div class="card-head"><div><div class="card-title">NDVI VEGETATION ANALYSIS</div><div class="card-sub">Simulated Sentinel-2 Band 8 / Band 4 composite</div></div><button class="btn btn-outline btn-sm" onclick="runSatScan()">▶ Refresh Scan</button></div>
+<div class="card-body">
+<div class="satellite-panel">
+<div class="sat-header"><span>Region: Yirgacheffe, SNNPR · 6.15°N 38.20°E</span><span id="sat-status" style="color:var(--green2)">COMPLIANT</span></div>
+<div class="sat-grid" id="sat-grid"></div>
+</div>
+<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:8px">
+<div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:8px;background:#1a6b1a;border-radius:1px"></div><span style="color:var(--text3)">Dense forest (NDVI >0.7)</span></div>
+<div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:8px;background:#5faa3f;border-radius:1px"></div><span style="color:var(--text3)">Coffee canopy (0.5–0.7)</span></div>
+<div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:8px;background:#c8842a;border-radius:1px"></div><span style="color:var(--text3)">Alert zone (&lt;0.4)</span></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">EUDR COMPLIANCE REPORT</div></div>
+<div class="card-body">
+<div class="ai-metric"><span class="am-label">EU Regulation</span><span class="am-val" style="color:var(--amber2)">2023/1115</span></div>
+<div class="ai-metric"><span class="am-label">Forest Baseline Year</span><span class="am-val">2020-12-31</span></div>
+<div class="ai-metric"><span class="am-label">Satellite Source</span><span class="am-val">Sentinel-2 Level-2A</span></div>
+<div class="ai-metric"><span class="am-label">NDVI Baseline (2020)</span><span class="am-val" style="color:var(--green2)">0.742</span></div>
+<div class="ai-metric"><span class="am-label">NDVI Current</span><span class="am-val" id="rep-ndvi" style="color:var(--green2)">0.718</span></div>
+<div class="ai-metric"><span class="am-label">Change</span><span class="am-val" id="rep-change" style="color:var(--green2)">-3.2% ✓</span></div>
+<div class="ai-metric"><span class="am-label">Deforestation Risk</span><span class="am-val" id="rep-risk" style="color:var(--green2)">LOW</span></div>
+<div class="ai-metric"><span class="am-label">Compliance Status</span><span class="am-val" id="rep-status" style="color:var(--green2)">✓ COMPLIANT</span></div>
+<div style="margin-top:12px;padding:8px;background:var(--green-dim);border:1px solid rgba(61,184,90,0.2);border-radius:var(--r-sm);font-size:11px;color:var(--green2)">This batch qualifies for an ERC-721 Green Certificate NFT and EU market access under EUDR Article 3.</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- ── ORACLE VIEW ── -->
+<div class="view" id="view-oracle">
+<div class="page-title">CHAINLINK PRICE ORACLE</div>
+<div class="page-sub">Coffee 'C' ICE Futures · Real-time price feeds · On-chain data bridge</div>
+<div class="stats-row">
+<div class="stat green"><div class="stat-label">Arabica (Coffee C)</div><div class="stat-val" id="o-arab">$3.48</div><div class="stat-sub">per kg · ICE NY</div></div>
+<div class="stat amber"><div class="stat-label">Robusta</div><div class="stat-val" id="o-rob">$1.95</div><div class="stat-sub">per kg · ICE London</div></div>
+<div class="stat blue"><div class="stat-label">Last Update</div><div class="stat-val" id="o-age">12s</div><div class="stat-sub">data freshness</div></div>
+<div class="stat purple"><div class="stat-label">Feed Status</div><div class="stat-val">LIVE</div><div class="stat-sub">Polygon Amoy</div></div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title">CHAINLINK AGGREGATOR — ON-CHAIN PRICE LOG</div></div>
+<div class="card-body" style="padding:0">
+<div class="terminal" id="oracle-log">
+<div class="log-line"><span class="log-time">T-60s</span><span class="log-tag tag-chain">FEED</span><span class="log-msg">roundId: 18440 · answer: <span class="hl">$3.46/kg</span> · updatedAt: block 8241010</span></div>
+<div class="log-line"><span class="log-time">T-48s</span><span class="log-tag tag-chain">FEED</span><span class="log-msg">roundId: 18441 · answer: <span class="hl">$3.47/kg</span> · updatedAt: block 8241015</span></div>
+<div class="log-line"><span class="log-time">T-36s</span><span class="log-tag tag-chain">FEED</span><span class="log-msg">roundId: 18442 · answer: <span class="hl">$3.48/kg</span> · updatedAt: block 8241020</span></div>
+<div class="log-line"><span class="log-time">T-24s</span><span class="log-tag tag-chain">FEED</span><span class="log-msg">roundId: 18443 · answer: <span class="hl">$3.48/kg</span> · updatedAt: block 8241027</span></div>
+<div class="log-line"><span class="log-time">T-12s</span><span class="log-tag tag-chain">FEED</span><span class="log-msg">roundId: 18444 · answer: <span class="hl">$3.48/kg</span> · updatedAt: block 8241033</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+</main>
+</div>
+
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STATE = {
+farms: [],
+nfts: [],
+loans: [],
+txs: 5,
+totalKg: 0,
+totalUSDC: 0,
+blockNum: 8241033,
+currentFarm: null,
+currentAI: null
+};
+
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function nav(id) {
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+document.getElementById('view-' + id).classList.add('active');
+document.getElementById('nav-' + id)?.classList.add('active');
+setFlowStep({coop:0,satellite:0,intelligence:1,blockchain:2,investor:3,admin:3,oracle:1,architecture:-1}[id] ?? -1);
+}
+
+
+function setFlowStep(n) {
+document.querySelectorAll('.fp').forEach((el, i) => {
+el.classList.toggle('active', i === n);
+});
+}
+
+
+// ── BLOCK TICKER ───────────────────────────────────────────────────────────
+setInterval(() => {
+STATE.blockNum += Math.random() > 0.7 ? 1 : 0;
+document.getElementById('bn').textContent = STATE.blockNum.toLocaleString();
+document.getElementById('bl-block').textContent = (STATE.blockNum/1000000).toFixed(2)+'M';
+document.getElementById('py-block').textContent = STATE.blockNum.toLocaleString();
+// Fluctuate price slightly
+const p = (3.48 + (Math.random()-0.5)*0.04).toFixed(2);
+document.getElementById('i-price').textContent = '$'+p;
+document.getElementById('o-arab').textContent = '$'+p;
+}, 3000);
+
+
+// ── SATELLITE GRID ─────────────────────────────────────────────────────────
+function buildSatGrid(compliance=true) {
+const grid = document.getElementById('sat-grid');
+if (!grid) return;
+grid.innerHTML = '';
+for (let i = 0; i < 64; i++) {
+const cell = document.createElement('div');
+cell.className = 'sat-cell';
+const r = Math.random();
+let color;
+if (!compliance && i > 20 && i < 28) {
+color = '#8B4513';
+} else if (r > 0.7) {
+color = '#1a6b1a';
+} else if (r > 0.3) {
+color = `rgb(${40+Math.floor(r*60)}, ${120+Math.floor(r*80)}, ${20+Math.floor(r*40)})`;
+} else {
+color = `rgb(${60+Math.floor(r*80)}, ${140+Math.floor(r*60)}, ${30+Math.floor(r*50)})`;
+}
+cell.style.background = color;
+grid.appendChild(cell);
+}
+}
+
+
+function runSatScan() {
+buildSatGrid(true);
+addLog('admin-log', 'chain', 'Sentinel-2 scan → NDVI 0.718 · EUDR: COMPLIANT');
+addLog('py-terminal', 'ok', 'eudr_score = satellite_model.predict(gps=(6.1534, 38.2047)) → 0.96');
+}
+
+
+buildSatGrid();
+
+
+// ── LOGGING ────────────────────────────────────────────────────────────────
+function addLog(containerId, type, msg) {
+const el = document.getElementById(containerId);
+if (!el) return;
+const tagMap = {ok:'tag-ok',info:'tag-info',warn:'tag-warn',err:'tag-err',chain:'tag-chain',py:'tag-info'};
+const labelMap = {ok:'OK',info:'INFO',warn:'WARN',err:'ERROR',chain:'CHAIN',py:'PY'};
+const now = new Date();
+const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+const div = document.createElement('div');
+div.className = 'log-line';
+div.innerHTML = `<span class="log-time">${t}</span><span class="log-tag ${tagMap[type]||'tag-info'}">${labelMap[type]||type.toUpperCase()}</span><span class="log-msg">${msg}</span>`;
+el.appendChild(div);
+el.scrollTop = el.scrollHeight;
+}
+
+
+// ── REGISTER FARM ──────────────────────────────────────────────────────────
+function fillDemo() {
+const demos = [
+{fn:'Almaz Girma',cid:'OCFCU-3921',r:'Sidama',gps:'6.8234° N, 38.4123° E',s:'1.8',v:'Heirloom Arabica',p:'Washed',y:'2024',yl:1200},
+{fn:'Bekele Teshome',cid:'OCFCU-1847',r:'Jimma',gps:'7.6731° N, 36.8342° E',s:'3.1',v:'Bourbon',p:'Natural',y:'2024',yl:2100},
+{fn:'Worknesh Haile',cid:'OCFCU-5034',r:'Harrar',gps:'9.3142° N, 42.1234° E',s:'1.2',v:'Heirloom Arabica',p:'Natural',y:'2024',yl:680},
+];
+const d = demos[Math.floor(Math.random()*demos.length)];
+document.getElementById('f-fn').value = d.fn;
+document.getElementById('f-cid').value = d.cid;
+document.getElementById('f-region').value = d.r;
+document.getElementById('f-gps').value = d.gps;
+document.getElementById('f-size').value = d.s;
+document.getElementById('f-var').value = d.v;
+document.getElementById('f-proc').value = d.p;
+document.getElementById('f-year').value = d.y;
+document.getElementById('f-yield').value = d.yl;
+document.getElementById('f-yield-v').textContent = d.yl + ' kg';
+}
+
+
+async function registerFarm() {
+const name = document.getElementById('f-fn').value.trim();
+const region = document.getElementById('f-region').value;
+const size = parseFloat(document.getElementById('f-size').value);
+const yieldKg = parseInt(document.getElementById('f-yield').value);
+const variety = document.getElementById('f-var').value;
+const process = document.getElementById('f-proc').value;
+const gps = document.getElementById('f-gps').value;
+const year = document.getElementById('f-year').value;
+const cid = document.getElementById('f-cid').value;
+const organic = document.getElementById('f-org').checked;
+const fairTrade = document.getElementById('f-ft').checked;
+
+
+if (!name || !size || !yieldKg) {
+document.getElementById('reg-msg').innerHTML = '<div class="msg-box msg-err">Please fill in all required fields.</div>';
+return;
+}
+document.getElementById('reg-msg').innerHTML = '<div class="msg-box msg-info"><div class="spinner-sm"></div> Registering farm & running AI analysis...</div>';
+document.querySelector('#view-coop .btn-green').disabled = true;
+
+
+const farm = { id: Date.now(), name, region, size, yieldKg, variety, process, gps, year, cid, organic, fairTrade };
+STATE.currentFarm = farm;
+
+
+try {
+const prompt = buildAIPrompt(farm);
+const res = await fetch('https://api.anthropic.com/v1/messages', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({
+model: 'claude-sonnet-4-20250514',
+max_tokens: 1000,
+messages: [{role:'user', content: prompt}]
+})
+});
+const data = await res.json();
+const raw = data.content.map(c => c.text||'').join('');
+const clean = raw.replace(/```json|```/g,'').trim();
+const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+const result = JSON.parse(clean.slice(s, e+1));
+STATE.currentAI = result;
+farm.ai = result;
+STATE.farms.push(farm);
+document.getElementById('reg-msg').innerHTML = '<div class="msg-box msg-ok">✓ Farm registered. AI analysis complete.</div>';
+document.querySelector('#view-coop .btn-green').disabled = false;
+showStep2(result, farm);
+updateStats();
+} catch(err) {
+document.getElementById('reg-msg').innerHTML = `<div class="msg-box msg-err">AI Error: ${err.message}. Try again.</div>`;
+document.querySelector('#view-coop .btn-green').disabled = false;
+}
+}
+
+
+function buildAIPrompt(farm) {
+return `You are an AI engine for an Ethiopia coffee trade finance and EUDR compliance system. Analyse this farm and return ONLY valid JSON, no markdown.
+
+
+Farm:
+- Name: ${farm.name}, Region: ${farm.region}, GPS: ${farm.gps}
+- Size: ${farm.size} ha, Variety: ${farm.variety}, Process: ${farm.process}
+- Yield: ${farm.yieldKg} kg, Year: ${farm.year}
+- Organic: ${farm.organic}, Fair Trade: ${farm.fairTrade}
+
+
+Return exactly:
+{
+"eudrScore": <0-100 integer>,
+"eudrStatus": "<COMPLIANT|AT_RISK|NON_COMPLIANT>",
+"ndviCurrent": <0.50-0.85 float>,
+"ndviBaseline": <0.55-0.90 float>,
+"deforestationRisk": "<LOW|MEDIUM|HIGH>",
+"creditScore": <300-850 integer>,
+"creditGrade": "<AA|A|B|C|D>",
+"yieldQuality": "<Specialty|Premium|Commercial>",
+"estimatedPricePerKg": <3.0-6.5 float>,
+"maxLoanUSDC": <integer>,
+"interestRatePct": <3.5-9.0 float>,
+"riskLevel": "<LOW|MEDIUM|HIGH>",
+"summary": "<2 sentence assessment>",
+"eudrNote": "<1 sentence on deforestation compliance>",
+"recommendation": "<1 sentence for the cooperative manager>"
+}`;
+}
+
+
+function showStep2(r, farm) {
+const eudrColor = r.eudrStatus === 'COMPLIANT' ? 'badge-green' : r.eudrStatus === 'AT_RISK' ? 'badge-amber' : 'badge-red';
+const creditColor = ['AA','A'].includes(r.creditGrade) ? '#5fd478' : r.creditGrade === 'B' ? '#d4922a' : '#e05858';
+
+
+document.getElementById('ai-output').innerHTML = `
+<div class="g2" style="margin-bottom:10px">
+<div>
+<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">EUDR COMPLIANCE</div>
+<div style="text-align:center;padding:12px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border)">
+${buildScoreRing(r.eudrScore, r.eudrStatus==='COMPLIANT'?'#3db85a':r.eudrStatus==='AT_RISK'?'#d4922a':'#e05858')}
+<div style="margin-top:8px"><span class="badge ${eudrColor}">${r.eudrStatus}</span></div>
+<div style="font-size:10px;color:var(--text3);margin-top:6px">NDVI: ${r.ndviCurrent} (baseline ${r.ndviBaseline})</div>
+</div>
+</div>
+<div>
+<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">AI CREDIT SCORE</div>
+<div style="text-align:center;padding:12px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border)">
+${buildScoreRing(Math.round((r.creditScore-300)/550*100), creditColor)}
+<div style="font-family:var(--display);font-size:18px;color:${creditColor};margin-top:4px">${r.creditScore} / 850</div>
+<div style="font-size:10px;color:var(--text3)">Grade: ${r.creditGrade} · ${r.riskLevel} Risk</div>
+</div>
+</div>
+</div>
+<div style="margin-bottom:10px">
+<div class="ai-metric"><span class="am-label">Yield Quality</span><span class="am-val" style="color:var(--green2)">${r.yieldQuality}</span></div>
+<div class="ai-metric"><span class="am-label">Est. Price / kg</span><span class="am-val" style="color:var(--amber2)">$${r.estimatedPricePerKg.toFixed(2)}</span></div>
+<div class="ai-metric"><span class="am-label">Max Loan (USDC)</span><span class="am-val" style="color:var(--text)">${r.maxLoanUSDC.toLocaleString()}</span></div>
+<div class="ai-metric"><span class="am-label">Interest Rate</span><span class="am-val">${r.interestRatePct.toFixed(1)}% APR</span></div>
+<div class="ai-metric"><span class="am-label">Deforestation Risk</span><span class="am-val">${r.deforestationRisk}</span></div>
+</div>
+<div style="padding:10px;background:var(--bg3);border-left:2px solid var(--green);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:6px">
+<strong style="color:var(--green2)">AI Summary:</strong> ${r.summary}
+</div>
+<div style="padding:10px;background:var(--bg3);border-left:2px solid var(--amber);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px;color:var(--text2);line-height:1.6">
+<strong style="color:var(--amber2)">EUDR:</strong> ${r.eudrNote}
+</div>`;
+
+
+document.getElementById('step2').classList.remove('hidden');
+
+
+// Auto-fill loan amount
+document.getElementById('f-loan').value = Math.min(r.maxLoanUSDC, 2000);
+
+
+// Show NFT preview
+const nftId = 1000 + STATE.farms.length;
+document.getElementById('nft-preview').innerHTML = `
+<div class="nft-row">
+<div class="nft-card">
+<div class="nft-header"><span>ERC-721 · POLYGON AMOY</span><span class="badge badge-${r.eudrStatus==='COMPLIANT'?'green':'amber'}">${r.eudrStatus}</span></div>
+<div class="nft-id">#${nftId}</div>
+<div class="nft-title">☕ ${farm.variety} · ${farm.region}</div>
+<div class="nft-attr">Origin: <span>${farm.region}, Ethiopia</span></div>
+<div class="nft-attr">Process: <span>${farm.process}</span></div>
+<div class="nft-attr">Weight: <span>${farm.yieldKg} kg</span></div>
+<div class="nft-attr">EUDR Score: <span>${r.eudrScore}/100</span></div>
+<div class="nft-attr">Grade: <span>${r.creditGrade} — ${r.yieldQuality}</span></div>
+<div class="nft-footer">Farmer: ${farm.name} · ${farm.cid}</div>
+</div>
+</div>`;
+
+
+document.getElementById('step3').classList.remove('hidden');
+
+
+// Log
+addLog('admin-log', 'ok', `Farm registered: ${farm.name} · EUDR: ${r.eudrStatus} · Credit: ${r.creditGrade}`);
+addLog('py-terminal', 'ok', `credit_score = model.predict(farm_id='${farm.cid}') → ${r.creditScore}`);
+}
+
+
+function buildScoreRing(pct, color) {
+const r=36, cx=44, cy=44, circ=2*Math.PI*r;
+const dash = pct/100 * circ * 0.75;
+return `<svg width="88" height="88" viewBox="0 0 88 88">
+<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-dasharray="${circ*0.75} ${circ*0.25}" stroke-linecap="round" transform="rotate(135 ${cx} ${cy})"/>
+<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="${dash} ${circ-dash}" stroke-linecap="round" transform="rotate(135 ${cx} ${cy})"/>
+<text x="${cx}" y="${cy+2}" text-anchor="middle" dominant-baseline="middle" font-family="Bebas Neue" font-size="20" fill="${color}">${pct}</text>
+</svg>`;
+}
+
+
+// ── MINT NFT & LOAN ────────────────────────────────────────────────────────
+async function mintNFTAndLoan() {
+const loanAmt = parseInt(document.getElementById('f-loan').value) || 0;
+if (!loanAmt || !STATE.currentFarm || !STATE.currentAI) return;
+document.getElementById('mint-msg').innerHTML = '<div class="msg-box msg-info"><div class="spinner-sm"></div> Minting NFT on Polygon Amoy...</div>';
+
+
+await sleep(800);
+STATE.blockNum += 3;
+
+
+const farm = STATE.currentFarm;
+const ai = STATE.currentAI;
+const nftId = 1000 + STATE.nfts.length + 1;
+const txHash = '0x' + Math.random().toString(16).slice(2,8) + '...' + Math.random().toString(16).slice(2,6);
+const txHash2 = '0x' + Math.random().toString(16).slice(2,8) + '...' + Math.random().toString(16).slice(2,6);
+
+
+const nft = { id: nftId, farm, ai, loanAmt, txHash, txHash2, date: new Date().toLocaleDateString() };
+STATE.nfts.push(nft);
+STATE.loans.push({ ...nft, status: 'Pending', dur: document.getElementById('f-dur').value });
+STATE.totalKg += farm.yieldKg;
+STATE.totalUSDC += loanAmt;
+STATE.txs += 2;
+
+
+document.getElementById('mint-msg').innerHTML = `<div class="msg-box msg-ok">✓ NFT #${nftId} minted · Loan request ${txHash2} submitted</div>`;
+
+
+// Add blockchain txs
+const txList = document.getElementById('tx-list');
+txList.insertAdjacentHTML('afterbegin', `
+<div class="tx-item fade"><div class="tx-hash">${txHash2}</div><div class="tx-detail"><div class="tx-title">Loan Request — ${farm.name} · $${loanAmt.toLocaleString()} USDC</div><div class="tx-meta">Block ${STATE.blockNum} · 0.0014 MATIC · CoffeeVault.originateLoan()</div></div><div class="tx-status"><span class="badge badge-amber">⏳ Pending</span></div></div>
+<div class="tx-item fade"><div class="tx-hash">${txHash}</div><div class="tx-detail"><div class="tx-title">Mint NFT #${nftId} — ${farm.variety}, ${farm.region} (EUDR: ${ai.eudrStatus})</div><div class="tx-meta">Block ${STATE.blockNum-1} · 0.0018 MATIC · CoffeeBatchNFT.mintCertificate()</div></div><div class="tx-status"><span class="badge badge-green">✓ Confirmed</span></div></div>`);
+
+
+addLog('admin-log', 'chain', `NFT #${nftId} minted → ${txHash} · Loan $${loanAmt} USDC queued`);
+addLog('py-terminal', 'chain', `w3.eth.contract(abi=NFT_ABI).functions.mint(${farm.cid}, ${nftId}).transact()`);
+
+
+updateStats();
+updateInvestorView();
+
+
+// Show farms list
+document.getElementById('farms-list').style.display = 'block';
+renderFarmsTable();
+
+
+document.getElementById('nb-tx').textContent = STATE.txs;
+document.getElementById('nb-inv').textContent = STATE.nfts.length;
+}
+
+
+function updateStats() {
+document.getElementById('s-farms').textContent = STATE.farms.length;
+document.getElementById('s-pend').textContent = STATE.loans.filter(l=>l.status==='Pending').length;
+document.getElementById('s-usdc').textContent = '$'+STATE.totalUSDC.toLocaleString();
+document.getElementById('s-nfts').textContent = STATE.nfts.length;
+document.getElementById('bl-txs').textContent = STATE.txs;
+document.getElementById('bl-usdc').textContent = '$'+STATE.totalUSDC.toLocaleString();
+document.getElementById('ss-total').textContent = STATE.totalKg.toLocaleString()+' kg';
+document.getElementById('i-comp').textContent = STATE.nfts.filter(n=>n.ai.eudrStatus==='COMPLIANT').length;
+document.getElementById('i-val').textContent = '$'+STATE.totalUSDC.toLocaleString();
+if (STATE.nfts.length > 0) {
+const avgRisk = Math.round(STATE.nfts.reduce((a,n)=>a+n.ai.creditScore,0)/STATE.nfts.length);
+document.getElementById('i-risk').textContent = avgRisk;
+}
+}
+
+
+function updateInvestorView() {
+// NFT portfolio
+const nftsEl = document.getElementById('inv-nfts');
+nftsEl.innerHTML = '<div style="padding:12px;display:flex;flex-wrap:wrap;gap:8px">' +
+STATE.nfts.map(n => `
+<div class="nft-card" style="min-width:160px;max-width:200px">
+<div class="nft-header"><span>NFT</span><span class="badge badge-${n.ai.eudrStatus==='COMPLIANT'?'green':'amber'}">${n.ai.eudrStatus==='COMPLIANT'?'✓ EUDR':n.ai.eudrStatus}</span></div>
+<div class="nft-id">#${n.id}</div>
+<div class="nft-title">☕ ${n.farm.variety}</div>
+<div class="nft-attr">Region: <span>${n.farm.region}</span></div>
+<div class="nft-attr">Weight: <span>${n.farm.yieldKg} kg</span></div>
+<div class="nft-attr">Grade: <span>${n.ai.creditGrade}</span></div>
+<div class="nft-footer">${n.farm.name} · ${n.date}</div>
+</div>`).join('') + '</div>';
+
+
+// EUDR scores
+const eudrEl = document.getElementById('eudr-scores');
+eudrEl.innerHTML = STATE.nfts.map(n => `
+<div style="margin-bottom:10px">
+<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--text2)">${n.farm.name} — ${n.farm.region}</span><span style="color:var(--${n.ai.eudrScore>=80?'green2':'amber2'})">${n.ai.eudrScore}/100</span></div>
+<div class="compliance-bar"><div class="cb-fill ${n.ai.eudrScore>=80?'cb-green':n.ai.eudrScore>=60?'cb-amber':'cb-red'}" style="width:${n.ai.eudrScore}%"></div></div>
+<div style="font-size:9px;color:var(--text3);margin-top:2px">NDVI: ${n.ai.ndviCurrent} · ${n.ai.deforestationRisk} deforestation risk</div>
+</div>`).join('') || '<div style="color:var(--text3);font-size:11px">No data yet</div>';
+
+
+// Loan table
+const tbody = document.getElementById('loan-tbody');
+if (STATE.loans.length === 0) {
+tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:1.5rem">No financing requests yet</td></tr>';
+} else {
+tbody.innerHTML = STATE.loans.map(l => `
+<tr>
+<td>${l.farm.name}</td>
+<td>${l.farm.region}</td>
+<td style="color:var(--amber2)">$${l.loanAmt.toLocaleString()}</td>
+<td><span class="badge badge-${['AA','A'].includes(l.ai.creditGrade)?'green':'amber'}">${l.ai.creditGrade}</span></td>
+<td><span class="badge badge-${l.ai.eudrStatus==='COMPLIANT'?'green':'amber'}">${l.ai.eudrStatus}</span></td>
+<td><span class="badge badge-${l.status==='Pending'?'amber':l.status==='Approved'?'green':'red'}">${l.status}</span></td>
+<td>
+${l.status==='Pending'?`<button class="btn btn-green btn-sm" onclick="approveLoan('${l.id}')">Approve</button>`:''}
+</td>
+</tr>`).join('');
+}
+}
+
+
+function approveLoan(id) {
+const loan = STATE.loans.find(l=>l.id==id);
+if (loan) {
+loan.status = 'Approved';
+addLog('admin-log', 'ok', `Loan APPROVED: ${loan.farm.name} · $${loan.loanAmt} USDC disbursed`);
+addLog('admin-log', 'chain', `CoffeeVault.disburseLoan() → ${loan.txHash2} · Confirmed`);
+updateInvestorView();
+updateStats();
+}
+}
+
+
+function renderFarmsTable() {
+const body = document.getElementById('farms-body');
+body.innerHTML = STATE.farms.map(f => `
+<div class="farmer-card">
+<div class="fc-avatar">${f.name[0]}</div>
+<div class="fc-body">
+<div class="fc-name">${f.name}</div>
+<div class="fc-meta">${f.region} · ${f.size} ha · ${f.variety} · ${f.yieldKg} kg</div>
+</div>
+<div class="fc-right">
+<div class="fc-score">${f.ai?.creditScore||'—'}</div>
+<div class="fc-grade">${f.ai?.creditGrade||''} · ${f.ai?.eudrStatus||''}</div>
+</div>
+</div>`).join('');
+}
+
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
+
+
+
+

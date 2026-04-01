@@ -1,0 +1,32 @@
+# =============================
+# NEVER PUSH THESE TO GITHUB
+# =============================
+
+# Secret keys and wallet seeds — MOST IMPORTANT
+.env
+
+# Python virtual environment
+venv/
+env/
+
+# Python auto-generated cache
+__pycache__/
+*.pyc
+
+# Raw data files
+data/raw/
+*.csv
+*.xlsx
+
+# Trained AI model files
+*.pkl
+*.joblib
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Mac junk
+.DS_Store
+
+# VS Code
+.vscode/
