@@ -1,6 +1,6 @@
 # 🌿 Ethiopian Coffee Trade Finance & EUDR Compliance System
 
-**MSc Thesis — Blockchain-Based Agricultural Asset Tokenisation 
+**PHD Thesis — Blockchain-Based Agricultural Asset Tokenisation 
 & AI-Driven Credit Risk Assessment**
 
 > Poznań University of Life Sciences (UPP) · 2026/27  
